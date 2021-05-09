@@ -1,15 +1,16 @@
 import jwt
 
 from flask import Flask, jsonify, request
-from database import db, ma
+from database import db, ma, mail
 from models.members import Members, members_schema
 from config.config import BaseConfig
-
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
 app.config.from_object(BaseConfig())
 db.init_app(app)
 ma.init_app(app)
+mail.init_app(app)
 
 @app.route('/')
 def index():
@@ -89,6 +90,16 @@ def test_request():
 def test_json():
     response = jsonify({'msg': 'welcome'})
     return response
+
+@app.route("/mail")
+def send_mail():
+    config = BaseConfig()
+    msg = Message("Hello", recipients=[config.MAIL_TEST_RECIPIENTS])
+    msg.body = "testing"
+    msg.html = "<b>testing</b>"
+    mail.send(msg)
+
+    return 'You Send Mail by Flask Mail Success!!'
 
 if __name__ == '__main__':
     app.run(debug=True)
